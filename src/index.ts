@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import callRoutes from './routes/callRoutes';
+
 import cors from "cors";
 
 const app = express();
@@ -16,6 +18,8 @@ const PORT = 3000;
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
+app.use('/api/call', callRoutes);
+
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");
