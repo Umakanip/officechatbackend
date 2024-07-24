@@ -13,18 +13,30 @@ sequelize
   });
 
 export const getUserList = async (req: Request, res: Response) => {
-  //   const fetchResult = await Users.findAll();
-  //   console.log(fetchResult);
   try {
-    const fetchResult = await Users.findAll();
-    res.json(fetchResult);
-    console.log(fetchResult);
-    return fetchResult;
+    // Step 1: Fetch all unique SenderIDs from the Messages table
+    const messages = await Messages.findAll({
+      attributes: ["SenderID"],
+      group: ["SenderID"],
+    });
+
+    // Extract unique user IDs from the messages
+    const senderIDs = [
+      ...new Set(messages.map((message: any) => message.SenderID)),
+    ];
+
+    // Step 2: Fetch user details from the Users table
+    const users = await Users.findAll({
+      where: {
+        UserID: senderIDs,
+      },
+    });
+
+    res.json(users);
   } catch (err: any) {
-    console.log("err", err.Message);
+    console.error("Error fetching users:", err.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-  //   return fetchResult;
-  // res.send({'Message':fetchResult})
 };
 
 export const getMessageList = async (req: Request, res: Response) => {
