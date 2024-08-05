@@ -1,8 +1,14 @@
-const { DataTypes, Model } = require("sequelize");
-//const sequelize = require('../config/database');
-import sequelize from "../models/index";
+import { DataTypes, Model } from "sequelize";
+import sequelize from "./dbconfig";
 
-class Chats extends Model {}
+class Chats extends Model {
+  public ChatID!: number;
+  public User1ID!: number;
+  public User2ID!: number;
+  public GroupID!: number;
+  public CreatedAt!: Date;
+}
+
 Chats.init(
   {
     ChatID: {
@@ -12,7 +18,7 @@ Chats.init(
     },
     User1ID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "Users",
         key: "UserID",
@@ -20,7 +26,7 @@ Chats.init(
     },
     User2ID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "Users",
         key: "UserID",
@@ -28,23 +34,23 @@ Chats.init(
     },
     GroupID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "Groups",
         key: "GroupID",
       },
     },
-
     CreatedAt: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
   },
   {
     sequelize,
     modelName: "Chats",
-    tableName: "Chats", // Make sure this matches your table name exactly
-    timestamps: false, // Disable timestamps (createdAt, updatedAt)
+    tableName: "Chats",
+    timestamps: false,
   }
 );
+
 export default Chats;

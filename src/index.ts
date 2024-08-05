@@ -1,31 +1,30 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
+import syncDatabase from "./models/dbSync"; // Import from the correct path
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
-import callRoutes from './routes/callRoutes';
-
-import cors from "cors";
+import bodyParser from "body-parser";
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+
 const PORT = 3000;
 
-// // CORS configuration
-// const corsOptions = {
-//   origin: "http://localhost:3001", // allow requests from this origin
-//   optionsSuccessStatus: 200, // some legacy browsers choke on 204
-// };
+// Sync database
+syncDatabase();
 
-app.use(express.json());
-app.use("/api/auth", authRoutes);
-app.use("/api", userRoutes);
-app.use('/api/call', callRoutes);
-
+// Middleware
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, world!");
 });
 
-//sequelize.sync().then(() => {
+app.use("/api/auth", authRoutes);
+app.use("/api", userRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

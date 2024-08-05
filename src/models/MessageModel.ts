@@ -1,8 +1,16 @@
-const { DataTypes, Model } = require("sequelize");
-//const sequelize = require('../config/database');
-import sequelize from "../models/index";
+import { DataTypes, Model } from "sequelize";
+import sequelize from "./dbconfig";
 
-class Messages extends Model {}
+class Messages extends Model {
+  public MessageID!: number;
+  public ChatID!: number;
+  public SenderID!: number;
+  public Content!: string;
+  public SentAt!: Date;
+  public IsDeleted!: boolean;
+  public IsPinned!: boolean;
+}
+
 Messages.init(
   {
     MessageID: {
@@ -26,14 +34,13 @@ Messages.init(
         key: "UserID",
       },
     },
-
     Content: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
     SentAt: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
     IsDeleted: {
       type: DataTypes.BOOLEAN,
@@ -47,8 +54,9 @@ Messages.init(
   {
     sequelize,
     modelName: "Messages",
-    tableName: "Messages", // Make sure this matches your table name exactly
-    timestamps: false, // Disable timestamps (createdAt, updatedAt)
+    tableName: "Messages",
+    timestamps: false,
   }
 );
+
 export default Messages;

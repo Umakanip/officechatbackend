@@ -1,7 +1,19 @@
-const { DataTypes, Model } = require("sequelize");
-//const sequelize = require('../config/database');
-import sequelize from "../models/index";
-class Users extends Model {}
+import { Model, DataTypes } from "sequelize";
+import sequelize from "./dbconfig"; // Ensure correct import path
+
+class Users extends Model {
+  public UserID!: number;
+  public Username!: string;
+  public Email!: string;
+  public PasswordHash!: string;
+  public FirstName!: string;
+  public LastName!: string;
+  public ProfilePicture!: Blob;
+  public Status!: string;
+  public LastSeen!: Date;
+  public IsMaster!: Boolean;
+}
+
 Users.init(
   {
     UserID: {
@@ -12,44 +24,44 @@ Users.init(
     Username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     Email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
-
     PasswordHash: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     FirstName: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     LastName: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     ProfilePicture: {
-      type: DataTypes.BLOB("long"),
+      type: DataTypes.BLOB,
+      allowNull: true,
     },
     Status: {
       type: DataTypes.STRING,
-      defaultValue: "Offline",
+      allowNull: false,
     },
     LastSeen: {
       type: DataTypes.DATE,
+      allowNull: false,
     },
     IsMaster: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      allowNull: true,
     },
   },
   {
     sequelize,
-    modelName: "User",
-    tableName: "Users", // Make sure this matches your table name exactly
-    timestamps: false, // Disable timestamps (createdAt, updatedAt)
+    modelName: "Users",
+    timestamps: false,
   }
 );
 
