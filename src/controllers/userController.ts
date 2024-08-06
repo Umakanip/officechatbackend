@@ -3,6 +3,8 @@ import Users from "../models/UserModel";
 import Messages from "../models/MessageModel";
 import Chats from "../models/ChatModel";
 import Groups from "../models/GroupModel";
+import Files from "../models/FileModel";
+
 import GroupMembers from "../models/GroupMembers";
 import { Op } from "sequelize";
 import { updateUserActivity, getUserActivity } from "../routes/activityTracker";
@@ -445,5 +447,41 @@ export const getUserStatus = async (req: Request, res: Response) => {
     res.status(200).json(status);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving status" });
+  }
+};
+
+
+export const uploadFileContent = async (req: Request, res: Response) => {
+  console.log('uploadFileContent',req.body);
+  const { fileBlob, filename, MessageID } = req.body;
+  console.log(filename);
+  if (!fileBlob || !filename) {
+    return res.status(400).json({ success: false, message: 'Content and Filename are required' });
+  }
+
+  try {
+
+    const FileContent = Buffer.from(fileBlob, 'base64');
+
+    // Define file path
+    const filePath = path.join(__dirname, 'public', filename);
+
+    // Save file content to a file
+    fs.writeFileSync(filePath, FileContent);
+
+    // Save file info to database
+    await Files.create({
+      MessageID: MessageID,
+      FileName: filename,
+      FileType: filename.mimetype, // Store MIME type
+      FileSize: filename.size,
+      FileContent: fs.readFileSync(filePath) // Read file content
+    });
+
+    res.status(200).json({ success: true, message: 'File content uploaded and saved successfully' });
+
+  } catch (error) {
+    console.error('Error uploading file content:', error);
+    res.status(500).json({ success: false, message: 'Error uploading file content' });
   }
 };

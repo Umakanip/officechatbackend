@@ -10,7 +10,7 @@ import {
   getUsernameSuggestions,
   // updateStatus,
   getActiveUser,
-  // uploadFileContent,
+  uploadFileContent,
 } from "../controllers/userController";
 
 const router = Router();
@@ -25,5 +25,5 @@ router.post("/addUsers", addUsersToGroup);
 router.get("/usernamesugggestions", getUsernameSuggestions);
 // router.post("/updateStatus", updateStatus);
 router.get("/getActiveUser", getActiveUser);
-// router.post("/uploadFileContent", uploadFileContent);
+router.post("/uploadFile", uploadFileContent);
 export default router;
