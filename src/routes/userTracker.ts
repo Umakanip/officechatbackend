@@ -1,13 +1,17 @@
 // server/userTracker.ts
-const loggedInUsers: any = [];
+var loggedInUsers: any = [];
 
 export const addUser = (userId: number) => {
   loggedInUsers.push(userId);
+  console.log("add userloggedInUsers", loggedInUsers);
 };
 
 export const removeUser = (userId: number) => {
-  loggedInUsers.pop(userId);
-  // console.log("loggedInUsers", loggedInUsers);
+  console.log("remove ", userId);
+  loggedInUsers = loggedInUsers.filter((item: number) => item !== userId);
+  // console.log(loggedInUsers);
+  // loggedInUsers.pop(loggedInUsers);
+  console.log("removed userloggedInUsers", loggedInUsers);
 };
 
 export const getLoggedInUsers = () => {

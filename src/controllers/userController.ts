@@ -7,6 +7,8 @@ import GroupMembers from "../models/GroupMembers";
 import { Op } from "sequelize";
 import { updateUserActivity, getUserActivity } from "../routes/activityTracker";
 import { getLoggedInUsers } from "../routes/userTracker";
+import fs from "fs";
+import path from "path";
 
 export const getUserList = async (req: Request, res: Response) => {
   console.log("/Users API check");
