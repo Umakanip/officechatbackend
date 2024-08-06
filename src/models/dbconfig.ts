@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 
-const sequelize = new Sequelize("officeChat", "abishck", "123456", {
+const sequelize = new Sequelize("chatapp", "mssqldb", "mssqldb@123", {
   host: "localhost",
   dialect: "mssql",
   dialectOptions: {

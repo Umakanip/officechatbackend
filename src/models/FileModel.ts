@@ -44,7 +44,7 @@ Files.init(
     },
     UploadedAt: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

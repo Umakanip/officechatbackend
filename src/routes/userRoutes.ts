@@ -12,6 +12,7 @@ import {
   getActiveUser,
   uploadFileContent,
 } from "../controllers/userController";
+import upload from "../middleware/upload";
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.post("/addUsers", addUsersToGroup);
 router.get("/usernamesugggestions", getUsernameSuggestions);
 // router.post("/updateStatus", updateStatus);
 router.get("/getActiveUser", getActiveUser);
-router.post("/uploadFile", uploadFileContent);
+// Route for uploading images
+router.post("/uploadFile", upload.uploadLogo.single("file"), uploadFileContent);
 export default router;
