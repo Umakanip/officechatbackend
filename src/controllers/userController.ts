@@ -451,50 +451,70 @@ export const getUserStatus = async (req: Request, res: Response) => {
 };
 
 export const uploadFileContent = async (req: Request, res: Response) => {
-  console.log("uploadFileContent");
-  const { fileBlob, filename, MessageID, filetype, filesize } = req.body;
-  console.log(filename);
-  if (!fileBlob || !filename) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Content and Filename are required" });
-  }
+  // console.log("uploadFileContent");
+  // const { fileBlob, filename, MessageID, filetype, filesize } = req.body;
+  // console.log(filename);
+  // if (!fileBlob || !filename) {
+  //   return res
+  //     .status(400)
+  //     .json({ success: false, message: "Content and Filename are required" });
+  // }
+  // try {
+  //   const FileContent = Buffer.from(fileBlob, "base64");
+  //   const publicDirectory = path.join(__dirname, "../../public");
+  //   // Ensure the directory exists
+  //   if (!fs.existsSync(publicDirectory)) {
+  //     fs.mkdirSync(publicDirectory, { recursive: true });
+  //   }
+  //   // Define file path
+  //   const filePath = path.join(publicDirectory, filename);
+  //   console.log("filePath", filePath);
+  //   // Save file content to a file
+  //   fs.writeFileSync(filePath, FileContent);
+  //   // Save file info to database
+  //   const files = await Files.create({
+  //     MessageID: MessageID,
+  //     FileName: filename,
+  //     FileType: filetype, // Store MIME type
+  //     FileSize: filesize,
+  //     FileContent: fs.readFileSync(filePath), // Read file content
+  //   });
+  //   res.status(200).json({
+  //     success: true,
+  //     resultData: {
+  //       files: files,
+  //       message: "File content uploaded and saved successfully",
+  //     },
+  //   });
+  // } catch (error) {
+  //   console.error("Error uploading file content:", error);
+  //   res
+  //     .status(500)
+  //     .json({ success: false, message: "Error uploading file content" });
+  // }
+};
+export const getUploadFile = async (req: Request, res: Response) => {
+  console.log("Request received");
+  console.log(`chatId: ${req.params.senderId}`);
+  const senderId = parseInt(req.params.senderId, 10);
 
   try {
-    const FileContent = Buffer.from(fileBlob, "base64");
-    const publicDirectory = path.join(__dirname, "../../public");
-    // Ensure the directory exists
-    if (!fs.existsSync(publicDirectory)) {
-      fs.mkdirSync(publicDirectory, { recursive: true });
+    const messages = await Messages.findAll({
+      where: { SenderID: senderId },
+      order: [["SentAt", "ASC"]], // Optional: Order messages by creation date
+    });
+
+    if (messages.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No messages found for this ChatID" });
     }
 
-    // Define file path
-    const filePath = path.join(publicDirectory, filename);
-    console.log("filePath", filePath);
-
-    // Save file content to a file
-    fs.writeFileSync(filePath, FileContent);
-
-    // Save file info to database
-    const files = await Files.create({
-      MessageID: MessageID,
-      FileName: filename,
-      FileType: filetype, // Store MIME type
-      FileSize: filesize,
-      FileContent: fs.readFileSync(filePath), // Read file content
-    });
-
-    res.status(200).json({
-      success: true,
-      resultData: {
-        files: files,
-        message: "File content uploaded and saved successfully",
-      },
-    });
-  } catch (error) {
-    console.error("Error uploading file content:", error);
+    res.json(messages);
+  } catch (err: any) {
+    console.error(err);
     res
       .status(500)
-      .json({ success: false, message: "Error uploading file content" });
+      .json({ error: "An error occurred while fetching messages" });
   }
 };
