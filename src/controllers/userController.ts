@@ -81,28 +81,56 @@ export const getMessageList = async (req: Request, res: Response) => {
 };
 
 export const getMessageListforSingle = async (req: Request, res: Response) => {
-  console.log("Request received");
-  console.log(`chatId: ${req.params.senderId}`);
-  const senderId = parseInt(req.params.senderId, 10);
+  const userId = parseInt(req.params.senderId, 10);
 
   try {
-    const messages = await Messages.findAll({
-      where: { SenderID: senderId },
-      order: [["SentAt", "ASC"]], // Optional: Order messages by creation date
+    // Find all chat IDs where the user is either User1 or User2
+    const chats = await Chats.findAll({
+      where: {
+        [Op.or]: [{ User1ID: userId }, { User2ID: userId }]
+      }
     });
 
-    if (messages.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No messages found for this ChatID" });
+    // Create a map for quick access to chat data
+    const chatMap = new Map<number, { User1ID: number, User2ID: number }>();
+    chats.forEach(chat => chatMap.set(chat.ChatID, {
+      User1ID: chat.User1ID,
+      User2ID: chat.User2ID
+    }));
+
+    // Extract ChatIDs from the chat records
+    const chatIds = Array.from(chatMap.keys());
+
+    // Find all messages associated with these ChatIDs
+    const messages = await Messages.findAll({
+      where: {
+        ChatID: {
+          [Op.in]: chatIds
+        }
+      },
+      order: [["SentAt", "ASC"]]
+    });
+
+    // Map messages to include sender information
+    const messagesWithSenderInfo = messages.map(message => {
+      const chat = chatMap.get(message.ChatID);
+      if (chat) {
+        return {
+          ...message.toJSON(),
+          SenderID: chat.User1ID === userId ? chat.User2ID : chat.User1ID
+        };
+      }
+      return null; // Skip if chat data is not found
+    }).filter(message => message !== null); // Remove any null values
+
+    if (messagesWithSenderInfo.length === 0) {
+      return res.status(404).json({ error: "No messages found for this user" });
     }
 
-    res.json(messages);
+    res.json(messagesWithSenderInfo);
   } catch (err: any) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching messages" });
+    res.status(500).json({ error: "An error occurred while fetching messages" });
   }
 };
 
@@ -493,6 +521,7 @@ export const uploadFileContent = async (req: Request, res: Response) => {
   //     .json({ success: false, message: "Error uploading file content" });
   // }
 };
+
 export const getUploadFile = async (req: Request, res: Response) => {
   console.log("Request received");
   console.log(`chatId: ${req.params.senderId}`);
