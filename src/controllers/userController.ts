@@ -429,13 +429,17 @@ export const getUsernameSuggestions = async (
           [Op.like]: `%${query}%`, // Case-insensitive partial match
         },
       },
-      attributes: ["Username"], // Return only the UserName attribute
+      attributes: ["UserID", "Username"], // Return only the UserName attribute
     });
 
     // Extract usernames from the result
-    const userNames = users.map((user) => user.Username);
+    const userResults = users.map((user) => ({
+      UserID: user.UserID,
+      Username: user.Username,
+    }));
 
-    response.json(userNames);
+    // Send the result to the frontend
+    response.json(userResults);
   } catch (error) {
     response.status(500).json({ error: "Error fetching suggestions" });
   }
