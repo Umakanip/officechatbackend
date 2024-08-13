@@ -117,7 +117,7 @@ export const getMessageListforSingle = async (req: Request, res: Response) => {
       if (chat) {
         return {
           ...message.toJSON(),
-          SenderID: chat.User1ID === userId ? chat.User2ID : chat.User1ID
+          SenderID: message.SenderID // Preserve the original SenderID from the Messages table
         };
       }
       return null; // Skip if chat data is not found
