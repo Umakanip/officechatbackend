@@ -11,11 +11,13 @@ import {
   // updateStatus,
   getActiveUser,
   getUploadFile,
+  getSingleUserList,
 } from "../controllers/userController";
 
 const router = Router();
 
 router.get("/users", getUserList);
+router.get("/users/:callerId", getSingleUserList);
 router.get("/messagelist", getMessageList);
 router.get("/messages/:senderId", getMessageListforSingle);
 router.get("/grouplist", getGroupList);

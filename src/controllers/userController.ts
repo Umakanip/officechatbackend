@@ -11,7 +11,32 @@ import { updateUserActivity, getUserActivity } from "../routes/activityTracker";
 import { getLoggedInUsers } from "../routes/userTracker";
 import fs from "fs";
 import path from "path";
+import { error } from "console";
 
+export const getSingleUserList = async (req: Request, res: Response) => {
+ console.log("callerid",req.params.callerId)
+  const userId = parseInt(req.params.callerId, 10);
+
+  try{
+    console.log("try",userId)
+    const user = await Users.findOne({ where: { UserID: userId } });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ error: `User not found: ${userId}` });
+      }
+     res
+      .status(200)
+      .json({ callerdetail:user });
+  }
+  catch (err: any) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching messages" });
+  }
+  
+}
 export const getUserList = async (req: Request, res: Response) => {
   console.log("/Users API check");
   try {
