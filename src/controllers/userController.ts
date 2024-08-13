@@ -557,6 +557,7 @@ export const uploadFileContent = async (req: Request, res: Response) => {
   //     .json({ success: false, message: "Error uploading file content" });
   // }
 };
+
 export const getUploadFile = async (req: Request, res: Response) => {
   console.log("Request received");
   console.log(`chatId: ${req.params.senderId}`);
