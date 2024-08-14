@@ -13,65 +13,128 @@ import fs from "fs";
 import path from "path";
 import { error } from "console";
 
-export const getSingleUserList = async (req: Request, res: Response) => {
- console.log("callerid",req.params.callerId)
-  const userId = parseInt(req.params.callerId, 10);
+// export const getSingleUserList = async (req: Request, res: Response) => {
+//  console.log("callerid",req.params.callerId)
+//   const userId = parseInt(req.params.callerId, 10);
 
-  try{
-    console.log("try",userId)
-    const user = await Users.findOne({ where: { UserID: userId } });
-      if (!user) {
-        return res
-          .status(404)
-          .json({ error: `User not found: ${userId}` });
-      }
-     res
-      .status(200)
-      .json({ callerdetail:user });
-  }
-  catch (err: any) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching messages" });
-  }
-  
-}
+//   try{
+//     console.log("try",userId)
+//     const user = await Users.findOne({ where: { UserID: userId } });
+//       if (!user) {
+//         return res
+//           .status(404)
+//           .json({ error: `User not found: ${userId}` });
+//       }
+//      res
+//       .status(200)
+//       .json({ callerdetail:user });
+//   }
+//   catch (err: any) {
+//     console.error(err);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while fetching messages" });
+//   }
+
+// }
+// export const getUserList = async (req: Request, res: Response) => {
+//   console.log("/Users API check");
+//   try {
+//     // Step 1: Fetch unique SenderIDs from the Messages table
+//     const messages = await Messages.findAll({
+//       attributes: ["SenderID"],
+//       group: ["SenderID"],
+//     });
+
+//     if (!messages || messages.length === 0) {
+//       console.warn("No messages found.");
+//       return res.status(404).json({ message: "No messages found." });
+//     }
+
+//     // Extract unique user IDs from the messages
+//     const senderIDs = messages.map((message: any) => message.SenderID);
+
+//     // If no SenderIDs found, return an empty array
+//     if (senderIDs.length === 0) {
+//       console.warn("No SenderIDs found.");
+//       return res.status(200).json([]);
+//     }
+
+//     // Step 2: Fetch user details from the Users table
+//     const users = await Users.findAll({
+//       where: {
+//         UserID: senderIDs,
+//       },
+//     });
+
+//     // If no users found, return an empty array
+//     if (!users || users.length === 0) {
+//       console.warn("No users found.");
+//       return res.status(404).json({ message: "No users found." });
+//     }
+//     // Step 3: Add active status to each user
+//     const activeUserIDs = new Set(getLoggedInUsers());
+//     const usersWithStatus = users.map((user) => ({
+//       ...user.toJSON(), // Convert Sequelize model instance to plain object
+//       isActive: activeUserIDs.has(user.UserID),
+//     }));
+
+//     res.json(usersWithStatus);
+//   } catch (err: any) {
+//     console.error("Error fetching users:", err.message);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 export const getUserList = async (req: Request, res: Response) => {
   console.log("/Users API check");
+
   try {
-    // Step 1: Fetch unique SenderIDs from the Messages table
-    const messages = await Messages.findAll({
+    // Step 1: Find all unique UserIDs from the Messages table
+    const messageSenders = await Messages.findAll({
       attributes: ["SenderID"],
       group: ["SenderID"],
     });
 
-    if (!messages || messages.length === 0) {
-      console.warn("No messages found.");
-      return res.status(404).json({ message: "No messages found." });
-    }
+    const senderIDs = messageSenders.map((message) => message.SenderID);
 
-    // Extract unique user IDs from the messages
-    const senderIDs = messages.map((message: any) => message.SenderID);
-
-    // If no SenderIDs found, return an empty array
-    if (senderIDs.length === 0) {
-      console.warn("No SenderIDs found.");
-      return res.status(200).json([]);
-    }
-
-    // Step 2: Fetch user details from the Users table
-    const users = await Users.findAll({
+    // Find all unique UserIDs from the Chats table (both User1ID and User2ID)
+    const chatParticipants = await Chats.findAll({
+      attributes: ["User1ID", "User2ID"],
       where: {
-        UserID: senderIDs,
+        [Op.or]: [
+          { User1ID: { [Op.in]: senderIDs } },
+          { User2ID: { [Op.in]: senderIDs } },
+        ],
       },
     });
 
-    // If no users found, return an empty array
-    if (!users || users.length === 0) {
+    // Create a set to store unique UserIDs
+    const userIDs = new Set<number>();
+
+    // Add User1ID and User2ID from chats to the set
+    chatParticipants.forEach((chat) => {
+      if (chat.User1ID) userIDs.add(chat.User1ID);
+      if (chat.User2ID) userIDs.add(chat.User2ID);
+    });
+
+    // Convert the set to an array
+    const uniqueUserIDs = Array.from(userIDs);
+
+    // Step 2: Fetch user details for these UserIDs
+    const users = await Users.findAll({
+      where: {
+        UserID: {
+          [Op.in]: uniqueUserIDs,
+        },
+      },
+    });
+
+    if (users.length === 0) {
       console.warn("No users found.");
       return res.status(404).json({ message: "No users found." });
     }
+
     // Step 3: Add active status to each user
     const activeUserIDs = new Set(getLoggedInUsers());
     const usersWithStatus = users.map((user) => ({

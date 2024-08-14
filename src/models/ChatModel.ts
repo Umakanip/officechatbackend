@@ -47,8 +47,8 @@ Chats.init(
   },
   {
     sequelize,
-    modelName: "Chats",
-    tableName: "Chats",
+    modelName: "OFCChats",
+    tableName: "OFCChats",
     timestamps: false,
   }
 );

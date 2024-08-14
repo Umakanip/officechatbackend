@@ -49,8 +49,8 @@ Files.init(
   },
   {
     sequelize,
-    modelName: "Files",
-    tableName: "Files",
+    modelName: "OFCFiles",
+    tableName: "OFCFiles",
     timestamps: false,
   }
 );
