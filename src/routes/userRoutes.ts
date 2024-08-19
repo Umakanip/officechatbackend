@@ -18,7 +18,7 @@ import {
 
 const router = Router();
 
-router.get("/users", getUserList);
+router.get("/users/:loggedInUserId", getUserList);
 // router.get("/users/:callerId", getSingleUserList);
 router.get("/messagelist", getMessageList);
 router.get("/messages/:senderId", getMessageListforSingle);
