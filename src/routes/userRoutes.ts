@@ -11,7 +11,10 @@ import {
   // updateStatus,
   getActiveUser,
   getUploadFile,
+  postCall,
+   getCallById,
   // getSingleUserList,
+  // getVoiceCall,
 } from "../controllers/userController";
 
 const router = Router();
@@ -29,4 +32,8 @@ router.get("/usernamesugggestions", getUsernameSuggestions);
 router.get("/getActiveUser", getActiveUser);
 // Route for uploading images
 router.post("/uploadFile", getUploadFile);
+// router.post("/voiceCall",getVoiceCall)
+router.post('/postCall', postCall);
+// Route to fetch call record by CallID
+router.get('/calls/:callId', getCallById);
 export default router;

@@ -12,6 +12,7 @@ import { getLoggedInUsers } from "../routes/userTracker";
 import fs from "fs";
 import path from "path";
 import { error } from "console";
+import Calls from "../models/CallModel";
 
 // export const getSingleUserList = async (req: Request, res: Response) => {
 //  console.log("callerid",req.params.callerId)
@@ -669,5 +670,56 @@ export const getUploadFile = async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching messages" });
+  }
+};
+
+
+export const postCall = async (req: Request, res: Response) => {
+  const {
+    CallerID,
+    ReceiverID,
+    GroupID,
+    StartTime,
+    EndTime,
+    CallType,
+    ScreenShared,
+  } = req.body;
+
+  try {
+    const newCall = await Calls.create({
+      CallerID,
+      ReceiverID,
+      GroupID,
+      StartTime,
+      EndTime,
+      CallType,
+      ScreenShared,
+    });
+
+    res.status(201).json(newCall);
+  } catch (err: any) {
+    console.error('Error storing call data:', err);
+    res.status(500).json({ error: 'Failed to store call data' });
+  }
+};
+
+
+
+export const getCallById = async (req: Request, res: Response) => {
+  const callId = parseInt(req.params.callId, 10);
+
+  try {
+    const call = await Calls.findOne({
+      where: { CallID: callId },
+    });
+
+    if (!call) {
+      return res.status(404).json({ error: 'Call not found' });
+    }
+
+    res.json(call);
+  } catch (err: any) {
+    console.error('Error fetching call data:', err);
+    res.status(500).json({ error: 'Failed to fetch call data' });
   }
 };
