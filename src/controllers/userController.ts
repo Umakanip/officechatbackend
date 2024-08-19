@@ -14,29 +14,23 @@ import path from "path";
 import { error } from "console";
 
 // export const getSingleUserList = async (req: Request, res: Response) => {
-//  console.log("callerid",req.params.callerId)
+//   console.log("callerid", req.params.callerId);
 //   const userId = parseInt(req.params.callerId, 10);
 
-//   try{
-//     console.log("try",userId)
+//   try {
+//     console.log("try", userId);
 //     const user = await Users.findOne({ where: { UserID: userId } });
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({ error: `User not found: ${userId}` });
-//       }
-//      res
-//       .status(200)
-//       .json({ callerdetail:user });
-//   }
-//   catch (err: any) {
+//     if (!user) {
+//       return res.status(404).json({ error: `User not found: ${userId}` });
+//     }
+//     res.status(200).json({ callerdetail: user });
+//   } catch (err: any) {
 //     console.error(err);
 //     res
 //       .status(500)
 //       .json({ error: "An error occurred while fetching messages" });
 //   }
-
-// }
+// };
 // export const getUserList = async (req: Request, res: Response) => {
 //   console.log("/Users API check");
 //   try {
@@ -304,6 +298,64 @@ export const getGroupMessagesList = async (req: Request, res: Response) => {
   }
 };
 
+export const getGroupMembersWithUsernames = async (
+  req: Request,
+  res: Response
+) => {
+  console.log("Groupid: ", parseInt(req.params.groupId, 10));
+
+  const groupId = parseInt(req.params.groupId, 10);
+  try {
+    // Fetch group members by groupId
+    const groupMembers = await GroupMembers.findAll({
+      where: { GroupID: groupId },
+      attributes: ["GroupID", "UserID", "JoinedAt"],
+    });
+
+    // Fetch usernames for each userId
+    const membersWithUsernames = await Promise.all(
+      groupMembers.map(async (member) => {
+        const user = await Users.findOne({
+          where: { UserID: member.UserID },
+          attributes: ["Username"],
+        });
+
+        return {
+          GroupID: member.GroupID,
+          UserID: member.UserID,
+          JoinedAt: member.JoinedAt,
+          Username: user ? user.Username : null,
+        };
+      })
+    );
+    console.log("membersWithUsernames", membersWithUsernames);
+    return res.status(200).json(membersWithUsernames);
+  } catch (error) {
+    console.error("Error fetching group members with usernames:", error);
+  }
+};
+export const deleteGroupMembers = async (req: Request, res: Response) => {
+  const { groupId, userId } = req.params;
+  console.log("delete", groupId, userId);
+  try {
+    // Delete the user from the group
+    const result = await GroupMembers.destroy({
+      where: {
+        GroupID: groupId,
+        UserID: userId,
+      },
+    });
+    console.log("RESULT", result);
+    if (result) {
+      res.status(200).send({ message: "User removed from group" });
+    } else {
+      res.status(404).send({ message: "User not found in group" });
+    }
+  } catch (error) {
+    console.error("Error removing user from group:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
 // export const getMessageList = async (req: Request, res: Response) => {
 //   console.log("req.body", req.query);
 //   try {

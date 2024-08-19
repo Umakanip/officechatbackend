@@ -12,6 +12,8 @@ import {
   getActiveUser,
   getUploadFile,
   // getSingleUserList,
+  getGroupMembersWithUsernames,
+  deleteGroupMembers,
 } from "../controllers/userController";
 
 const router = Router();
@@ -21,6 +23,8 @@ router.get("/users", getUserList);
 router.get("/messagelist", getMessageList);
 router.get("/messages/:senderId", getMessageListforSingle);
 router.get("/grouplist", getGroupList);
+router.get("/groupmembers/:groupId", getGroupMembersWithUsernames);
+router.delete("/groups/:groupId/members/:userId", deleteGroupMembers);
 router.get("/groupmessages", getGroupMessagesList);
 router.post("/creategroup", createGroup);
 router.post("/addUsers", addUsersToGroup);
