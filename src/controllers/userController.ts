@@ -82,9 +82,11 @@ import Calls from "../models/CallModel";
 // };
 
 export const getUserList = async (req: Request, res: Response) => {
-  console.log("/Users API check");
+  console.log("Logged in User ID:", req.params.loggedInUserId);
 
   try {
+    const loggedInUserId = parseInt(req.params.loggedInUserId, 10);
+
     // Step 1: Find all unique UserIDs from the Messages table
     const messageSenders = await Messages.findAll({
       attributes: ["SenderID"],
@@ -103,6 +105,7 @@ export const getUserList = async (req: Request, res: Response) => {
         ],
       },
     });
+    console.log("Chat Participants:", chatParticipants);
 
     // Create a set to store unique UserIDs
     const userIDs = new Set<number>();
@@ -112,19 +115,17 @@ export const getUserList = async (req: Request, res: Response) => {
       if (chat.User1ID) userIDs.add(chat.User1ID);
       if (chat.User2ID) userIDs.add(chat.User2ID);
     });
-
-    // Convert the set to an array
-    const uniqueUserIDs = Array.from(userIDs);
-
+    console.log("Unique User IDs:", Array.from(userIDs));
     // Step 2: Fetch user details for these UserIDs
     const users = await Users.findAll({
       where: {
         UserID: {
-          [Op.in]: uniqueUserIDs,
+          [Op.in]: [...userIDs],
+          [Op.ne]: loggedInUserId, // Exclude logged-in user
         },
       },
     });
-
+    console.log("users", users);
     if (users.length === 0) {
       console.warn("No users found.");
       return res.status(404).json({ message: "No users found." });
@@ -357,71 +358,49 @@ export const deleteGroupMembers = async (req: Request, res: Response) => {
     res.status(500).send({ message: "Internal server error" });
   }
 };
-// export const getMessageList = async (req: Request, res: Response) => {
-//   console.log("req.body", req.query);
-//   try {
-//     // Ensure SenderID is coming from query parameters
-//     const senderID = req.query.SenderID as string;
 
-//     if (!senderID) {
-//       return res
-//         .status(400)
-//         .json({ error: "SenderID query parameter is required" });
+// export const createGroup = async (request: Request, response: Response) => {
+//   console.log("Request body:", request.body);
+//   const { GroupName, Username, CreatedBy, CreatedAt } = request.body;
+
+//   try {
+//     // Check if usernames are provided
+//     if (!Username || !Array.isArray(Username) || Username.length === 0) {
+//       return response.status(400).json({
+//         error: "Usernames array is required and should not be empty.",
+//       });
 //     }
 
-//     const messageResult = await Messages.findAll({
-//       where: {
-//         SenderID: req.query.SenderID,
-//       },
-//     });
-//     res.json(messageResult);
-//   } catch (err: any) {
-//     console.log("err", err.Message);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
-// export const createGroup = async (request: Request, response: Response) => {
-//   const data = request.body;
-//   console.log("data.GroupName", data.GroupName);
-
-//   try {
-//     // Create the group
-//     const group = await Groups.create({
-//       GroupName: data.GroupName,
-//       CreatedBy: data.CreatedBy,
-//       CreatedAt: data.CreatedAt,
-//     });
-
-//     // Optionally, you might want to return the created group or some confirmation
-//     response.json({ success: true, group });
-//   } catch (err: any) {
-//     console.error("Error creating group chat:", err.message);
-//     response.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-// export const createGroup = async (request: Request, response: Response) => {
-//   console.log("request check", request.body);
-//   const { GroupName, userIDs, CreatedBy, CreatedAt } = request.body;
-//   try {
-//     // Check if the user ID exists in the Users table
+//     // Fetch user IDs based on provided usernames
 //     const users = await Users.findAll({
 //       where: {
-//         Username: userIDs,
+//         Username: Username, // Ensure the column name matches your schema
 //       },
 //     });
 
-//     const existingUserIDs = users.map((user) => user.UserID);
-//     const allUsersExist = userIDs.every((userID: any) =>
-//       existingUserIDs.includes(userID)
+//     console.log("Users fetched:", users);
+
+//     // Create a map of usernames to user IDs
+//     const userIDMap = new Map(
+//       users.map((user) => [user.Username, user.UserID])
 //     );
 
-//     if (!allUsersExist) {
+//     console.log("UserID Map:", userIDMap);
+
+//     // Convert usernames to user IDs
+//     const userIDs = Username.map((name) => userIDMap.get(name)).filter(
+//       (id) => id !== undefined
+//     );
+
+//     console.log("User IDs:", userIDs);
+
+//     // Check if all provided usernames are valid
+//     if (userIDs.length !== Username.length) {
 //       return response
 //         .status(400)
-//         .json({ error: "One or more user IDs do not exist." });
+//         .json({ error: "One or more usernames do not exist." });
 //     }
+
 //     // Create the group
 //     const group = await Groups.create({
 //       GroupName: GroupName,
@@ -429,17 +408,21 @@ export const deleteGroupMembers = async (req: Request, res: Response) => {
 //       CreatedAt: CreatedAt,
 //     });
 
+//     console.log("Group created:", group);
+
 //     // Add members to the group
-//     const groupMembers = userIDs.map((UserID: any) => ({
+//     const groupMembers = userIDs.map((UserID: number) => ({
 //       GroupID: group.GroupID,
 //       UserID,
 //       JoinedAt: new Date(),
 //     }));
-//     console.log("Groupmembers", groupMembers);
+
+//     console.log("Group members to be inserted:", groupMembers);
 //     await GroupMembers.bulkCreate(groupMembers);
 
 //     response.json(group);
-//   } catch (error) {
+//   } catch (error: any) {
+//     console.error("Error creating group:", error.message);
 //     response.status(500).json({ error: "Error creating group" });
 //   }
 // };
@@ -449,44 +432,46 @@ export const createGroup = async (request: Request, response: Response) => {
   const { GroupName, Username, CreatedBy, CreatedAt } = request.body;
 
   try {
-    // Check if usernames are provided
     if (!Username || !Array.isArray(Username) || Username.length === 0) {
       return response.status(400).json({
         error: "Usernames array is required and should not be empty.",
       });
     }
 
-    // Fetch user IDs based on provided usernames
     const users = await Users.findAll({
       where: {
-        Username: Username, // Ensure the column name matches your schema
+        Username: Username,
       },
     });
 
     console.log("Users fetched:", users);
 
-    // Create a map of usernames to user IDs
     const userIDMap = new Map(
       users.map((user) => [user.Username, user.UserID])
     );
 
     console.log("UserID Map:", userIDMap);
 
-    // Convert usernames to user IDs
     const userIDs = Username.map((name) => userIDMap.get(name)).filter(
       (id) => id !== undefined
     );
 
-    console.log("User IDs:", userIDs);
+    // Ensure the CreatedBy user is also added to the group
+    console.log("Initial User IDs:", userIDs);
+    console.log("CreatedBy UserID:", CreatedBy);
 
-    // Check if all provided usernames are valid
-    if (userIDs.length !== Username.length) {
+    // Check if CreatedBy user ID is already in the array
+    if (!userIDs.includes(CreatedBy)) {
+      userIDs.push(CreatedBy);
+    }
+
+    console.log("Final User IDs after pushing CreatedBy:", userIDs);
+    if (userIDs.length !== Username.length && !userIDs.includes(CreatedBy)) {
       return response
         .status(400)
         .json({ error: "One or more usernames do not exist." });
     }
 
-    // Create the group
     const group = await Groups.create({
       GroupName: GroupName,
       CreatedBy: CreatedBy,
@@ -495,7 +480,6 @@ export const createGroup = async (request: Request, response: Response) => {
 
     console.log("Group created:", group);
 
-    // Add members to the group
     const groupMembers = userIDs.map((UserID: number) => ({
       GroupID: group.GroupID,
       UserID,
