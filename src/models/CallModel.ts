@@ -1,6 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from './dbconfig';
-
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "./dbconfig";
 
 class Calls extends Model {
   public CallID!: number;
@@ -24,24 +23,24 @@ Calls.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'UserID',
+        model: "Users",
+        key: "UserID",
       },
     },
     ReceiverID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'UserID',
+        model: "Users",
+        key: "UserID",
       },
     },
     GroupID: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: 'Groups',
-        key: 'GroupID',
+        model: "Groups",
+        key: "GroupID",
       },
     },
     StartTime: {
@@ -63,8 +62,8 @@ Calls.init(
   },
   {
     sequelize,
-    modelName: 'Calls',
-    tableName: 'Calls',
+    modelName: "OFCCalls",
+    tableName: "OFCCalls",
     timestamps: false,
   }
 );

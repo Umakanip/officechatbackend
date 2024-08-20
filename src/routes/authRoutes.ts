@@ -21,6 +21,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
   try {
     const user = await Users.findOne({ where: { Email, PasswordHash } });
+    console.log(user?.dataValues.UserID);
     addUser(user?.dataValues.UserID);
 
     if (!user) {

@@ -53,8 +53,8 @@ Messages.init(
   },
   {
     sequelize,
-    modelName: "Messages",
-    tableName: "Messages",
+    modelName: "OFCMessages",
+    tableName: "OFCMessages",
     timestamps: false,
   }
 );

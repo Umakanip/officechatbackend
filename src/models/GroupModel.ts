@@ -20,7 +20,7 @@ Groups.init(
       allowNull: false,
     },
     CreatedBy: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     CreatedAt: {
@@ -30,8 +30,8 @@ Groups.init(
   },
   {
     sequelize,
-    modelName: "Groups",
-    tableName: "Groups",
+    modelName: "OFCGroups",
+    tableName: "OFCGroups",
     timestamps: false,
   }
 );

@@ -60,8 +60,8 @@ Users.init(
   },
   {
     sequelize,
-    modelName: "Users",
-    tableName: "Users",
+    modelName: "OFCUsers",
+    tableName: "OFCUsers",
     timestamps: false,
   }
 );

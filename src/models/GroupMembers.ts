@@ -37,8 +37,8 @@ GroupMembers.init(
   },
   {
     sequelize,
-    modelName: "GroupMembers",
-    tableName: "GroupMembers",
+    modelName: "OFCGroupMembers",
+    tableName: "OFCGroupMembers",
     timestamps: false,
   }
 );
