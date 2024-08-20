@@ -1,20 +1,8 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from './dbconfig';
 
-interface CallsAttributes {
-  CallID: number;
-  CallerID: number;
-  ReceiverID: number;
-  GroupID?: number | null;
-  StartTime: Date;
-  EndTime?: Date | null;
-  CallType: string; // e.g., 'audio' or 'video'
-  ScreenShared: boolean;
-}
 
-interface CallsCreationAttributes extends Optional<CallsAttributes, 'CallID'> {}
-
-class Calls extends Model<CallsAttributes, CallsCreationAttributes> implements CallsAttributes {
+class Calls extends Model {
   public CallID!: number;
   public CallerID!: number;
   public ReceiverID!: number;

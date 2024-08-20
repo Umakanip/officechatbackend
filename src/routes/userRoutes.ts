@@ -12,9 +12,10 @@ import {
   getActiveUser,
   getUploadFile,
   postCall,
-   getCallById,
+  //  getCallById,
   // getSingleUserList,
-  // getVoiceCall,
+  getGroupMembersWithUsernames,
+  deleteGroupMembers,
 } from "../controllers/userController";
 
 const router = Router();
@@ -24,6 +25,8 @@ router.get("/users", getUserList);
 router.get("/messagelist", getMessageList);
 router.get("/messages/:senderId", getMessageListforSingle);
 router.get("/grouplist", getGroupList);
+router.get("/groupmembers/:groupId", getGroupMembersWithUsernames);
+router.delete("/groups/:groupId/members/:userId", deleteGroupMembers);
 router.get("/groupmessages", getGroupMessagesList);
 router.post("/creategroup", createGroup);
 router.post("/addUsers", addUsersToGroup);
@@ -35,5 +38,5 @@ router.post("/uploadFile", getUploadFile);
 // router.post("/voiceCall",getVoiceCall)
 router.post('/postCall', postCall);
 // Route to fetch call record by CallID
-router.get('/calls/:callId', getCallById);
+// router.get('/calls/:callId', getCallById);
 export default router;

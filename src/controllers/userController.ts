@@ -15,29 +15,23 @@ import { error } from "console";
 import Calls from "../models/CallModel";
 
 // export const getSingleUserList = async (req: Request, res: Response) => {
-//  console.log("callerid",req.params.callerId)
+//   console.log("callerid", req.params.callerId);
 //   const userId = parseInt(req.params.callerId, 10);
 
-//   try{
-//     console.log("try",userId)
+//   try {
+//     console.log("try", userId);
 //     const user = await Users.findOne({ where: { UserID: userId } });
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({ error: `User not found: ${userId}` });
-//       }
-//      res
-//       .status(200)
-//       .json({ callerdetail:user });
-//   }
-//   catch (err: any) {
+//     if (!user) {
+//       return res.status(404).json({ error: `User not found: ${userId}` });
+//     }
+//     res.status(200).json({ callerdetail: user });
+//   } catch (err: any) {
 //     console.error(err);
 //     res
 //       .status(500)
 //       .json({ error: "An error occurred while fetching messages" });
 //   }
-
-// }
+// };
 // export const getUserList = async (req: Request, res: Response) => {
 //   console.log("/Users API check");
 //   try {
@@ -305,6 +299,64 @@ export const getGroupMessagesList = async (req: Request, res: Response) => {
   }
 };
 
+export const getGroupMembersWithUsernames = async (
+  req: Request,
+  res: Response
+) => {
+  console.log("Groupid: ", parseInt(req.params.groupId, 10));
+
+  const groupId = parseInt(req.params.groupId, 10);
+  try {
+    // Fetch group members by groupId
+    const groupMembers = await GroupMembers.findAll({
+      where: { GroupID: groupId },
+      attributes: ["GroupID", "UserID", "JoinedAt"],
+    });
+
+    // Fetch usernames for each userId
+    const membersWithUsernames = await Promise.all(
+      groupMembers.map(async (member) => {
+        const user = await Users.findOne({
+          where: { UserID: member.UserID },
+          attributes: ["Username"],
+        });
+
+        return {
+          GroupID: member.GroupID,
+          UserID: member.UserID,
+          JoinedAt: member.JoinedAt,
+          Username: user ? user.Username : null,
+        };
+      })
+    );
+    console.log("membersWithUsernames", membersWithUsernames);
+    return res.status(200).json(membersWithUsernames);
+  } catch (error) {
+    console.error("Error fetching group members with usernames:", error);
+  }
+};
+export const deleteGroupMembers = async (req: Request, res: Response) => {
+  const { groupId, userId } = req.params;
+  console.log("delete", groupId, userId);
+  try {
+    // Delete the user from the group
+    const result = await GroupMembers.destroy({
+      where: {
+        GroupID: groupId,
+        UserID: userId,
+      },
+    });
+    console.log("RESULT", result);
+    if (result) {
+      res.status(200).send({ message: "User removed from group" });
+    } else {
+      res.status(404).send({ message: "User not found in group" });
+    }
+  } catch (error) {
+    console.error("Error removing user from group:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
 // export const getMessageList = async (req: Request, res: Response) => {
 //   console.log("req.body", req.query);
 //   try {
@@ -675,26 +727,10 @@ export const getUploadFile = async (req: Request, res: Response) => {
 
 
 export const postCall = async (req: Request, res: Response) => {
-  const {
-    CallerID,
-    ReceiverID,
-    GroupID,
-    StartTime,
-    EndTime,
-    CallType,
-    ScreenShared,
-  } = req.body;
+  const {CallerID,ReceiverID,GroupID,StartTime,EndTime,CallType,ScreenShared,} = req.body;
 
   try {
-    const newCall = await Calls.create({
-      CallerID,
-      ReceiverID,
-      GroupID,
-      StartTime,
-      EndTime,
-      CallType,
-      ScreenShared,
-    });
+    const newCall = await Calls.create({CallerID,ReceiverID,GroupID,StartTime,EndTime,CallType,ScreenShared,});
 
     res.status(201).json(newCall);
   } catch (err: any) {
@@ -703,23 +739,21 @@ export const postCall = async (req: Request, res: Response) => {
   }
 };
 
+// export const getCallById = async (req: Request, res: Response) => {
+//   const callId = parseInt(req.params.callId, 10);
 
+//   try {
+//     const call = await Calls.findOne({
+//       where: { CallID: callId },
+//     });
 
-export const getCallById = async (req: Request, res: Response) => {
-  const callId = parseInt(req.params.callId, 10);
+//     if (!call) {
+//       return res.status(404).json({ error: 'Call not found' });
+//     }
 
-  try {
-    const call = await Calls.findOne({
-      where: { CallID: callId },
-    });
-
-    if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
-    }
-
-    res.json(call);
-  } catch (err: any) {
-    console.error('Error fetching call data:', err);
-    res.status(500).json({ error: 'Failed to fetch call data' });
-  }
-};
+//     res.json(call);
+//   } catch (err: any) {
+//     console.error('Error fetching call data:', err);
+//     res.status(500).json({ error: 'Failed to fetch call data' });
+//   }
+// };
