@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.json({ limit: "50mb" }));
 
 // Access environment variables
-const PORT: number = parseInt(process.env.PORT as string, 10) || 5000;
+const PORT: number = parseInt(process.env.PORT as string, 10) || 3002;
 
 // Sync database
 syncDatabase();
