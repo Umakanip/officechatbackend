@@ -12,7 +12,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.json({ limit: "50mb" }));
 
-const PORT = 3000;
+// Access environment variables
+const PORT: number = parseInt(process.env.PORT as string, 10) || 5000;
 
 // Sync database
 syncDatabase();
@@ -29,5 +30,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(
+    `Server is running on http://localhost:${parseInt(
+      process.env.PORT as string,
+      10
+    )}`
+  );
 });
